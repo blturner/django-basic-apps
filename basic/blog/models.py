@@ -2,6 +2,7 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.db.models import permalink
 from django.contrib.auth.models import User
+from django.contrib.sites.models import Site
 from django.conf import settings
 
 from basic.blog.managers import PublicManager
@@ -48,6 +49,7 @@ class Post(models.Model):
     modified = models.DateTimeField(_('modified'), auto_now=True)
     categories = models.ManyToManyField(Category, blank=True)
     tags = TagField()
+    sites = models.ManyToManyField(Site)
     objects = PublicManager()
 
     class Meta:
