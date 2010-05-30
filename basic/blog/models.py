@@ -72,10 +72,10 @@ class Post(models.Model):
         })
 
     def get_previous_post(self):
-        return self.get_previous_by_publish(status__gte=2)
+        return self.get_previous_by_publish(status__gte=2, sites__id__exact=settings.SITE_ID)
 
     def get_next_post(self):
-        return self.get_next_by_publish(status__gte=2)
+        return self.get_next_by_publish(status__gte=2, sites__id__exact=settings.SITE_ID)
 
 
 class BlogRoll(models.Model):
