@@ -11,17 +11,23 @@
 
 
 {% block content %}
-  <ul>
-    {% for message in message_list %}
-      {% if mailbox == 'sent' %}
-        <li><small class="status">{{ message.get_from_status_display }}</small>
-          <a href="{% url message object_id=message.pk, inbox="sent" %}">{{ message.subject }}</a></li>
-      {% else %}
-        <li><small class="status">{{ message.get_to_status_display }}</small>
-          <a href="{% url message object_id=message.pk, inbox="inbox" %}">{{ message.subject }}</a></li>
-      {% endif %}
-    {% endfor %}
-  </ul>
+  {% load messages %}
 
-  <p><a href="{% url message_create %}" class="button">Compose message</a></p>
+  <table>
+    {% for message in message_list %}
+    <tr{% if message.is_new and message.from_user != user %} class="new_message"{% endif %}>
+      {% if message.to_user == user %}
+        <td>{{ message.from_user }}</td>
+      {% else %}
+        <td>To: {{ message.to_user }}</td>
+        <td>{{ message.get_from_status_display }}</td>
+      {% endif %}
+      <td><a href="{{ message.get_absolute_url }}">{{ message.subject|default:"No subject" }}</a></td>
+      <td>{{ message.created|date }}</td>
+      <td><a href="{% url messages:reply message.pk %}">reply</a></td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  <p><a href="{% url messages:create %}" class="button">Compose message</a></p>
 {% endblock %}

@@ -4,16 +4,18 @@ from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.contenttypes.models import ContentType
 
-from basic.messages.models import Message
+from basic.messages.models import Message, TO_STATUS_READ, TO_STATUS_DELETED, FROM_STATUS_DELETED
 from basic.messages.forms import MessageForm
-
+from basic.tools.baseconv import base62
 
 @login_required
-def message_list(request, mailbox='inbox', template_name='messages/message_list.html'):
+def message_list(request, mailbox=None, template_name='messages/message_list.html'):
     """
     Returns a list of user messages.
-    
+
     Template:: ``messages/message_list.html``
     Context:
         message_list
@@ -22,69 +24,119 @@ def message_list(request, mailbox='inbox', template_name='messages/message_list.
             String representing the current 'mailbox'
     """
     if mailbox == 'sent':
-        message_list = Message.objects.filter(from_user=request.user, from_status=1)
+        message_list = Message.objects.sent(request.user)
+    elif mailbox == 'inbox':
+        message_list = Message.objects.new(request.user)
+    elif mailbox == 'trash':
+        message_list = Message.objects.trash(request.user)
     else:
-        message_list = Message.objects.filter(to_user=request.user, to_status__in=(0,1,2))
+        message_list = Message.objects.archive(request.user)
+
     return render_to_response(template_name, {
         'message_list': message_list,
-        'mailbox': mailbox
+        'mailbox': mailbox or 'archive'
     }, context_instance=RequestContext(request))
 
 
 @login_required
-def message_create(request, username=None, template_name='messages/message_form.html'):
+def message_create(request, content_type_id=None, object_id=None, 
+                    template_name='messages/message_form.html'):
     """
     Handles a new message and displays a form.
-    
+
     Template:: ``messages/message_form.html``
     Context:
         form
             MessageForm object
     """
-    if username:
-        to_user = get_object_or_404(User, username=username)
+    next = request.GET.get('next', None)
+    if request.GET.get('to', None):
+        to_user = get_object_or_404(User, username=request.GET['to'])
     else:
         to_user = None
+    
+    if content_type_id and object_id:
+        content_type = ContentType.objects.get(pk=base62.to_decimal(content_type_id))
+        Model = content_type.model_class()
+        try:
+            related_object = Model.objects.get(pk=base62.to_decimal(object_id))
+        except ObjectDoesNotExist:
+            raise Http404, "The object ID was invalid."
+    else:
+        related_object = None
+    
     form = MessageForm(request.POST or None, initial={'to_user': to_user})
     if form.is_valid():
         message = form.save(commit=False)
+        if related_object:
+            message.object = related_object
         message.from_user = request.user
-        message.save()
-        return HttpResponseRedirect(reverse('user_messages'))
+        message = form.save()
+        return HttpResponseRedirect(next or reverse('messages:messages'))
     return render_to_response(template_name, {
         'form': form,
-        'to_user': to_user
+        'to_user': to_user,
+        'related_object': related_object,
+        'next': next,
+    }, context_instance=RequestContext(request))
+
+
+def message_reply(request, object_id, template_name='messages/message_form.html'):
+    """
+    Handles a reply to a specific message.
+    """
+    original_message = get_object_or_404(Message, pk=object_id)
+    next = request.GET.get('next', None)
+    initial = {
+        'to_user': original_message.from_user,
+        'subject': 'Re: %s' % original_message.subject
+    }
+    form = MessageForm(request.POST or None, initial=initial)
+    if form.is_valid():
+        message = form.save(commit=False)
+        message.object = original_message.object
+        message.from_user = request.user
+        message = form.save()
+        return HttpResponseRedirect(next or reverse('messages:messages'))
+    return render_to_response(template_name, {
+        'form': form,
+        'message': original_message,
+        'next': next,
     }, context_instance=RequestContext(request))
 
 
 @login_required
-def message_remove(request):
+def message_remove(request, object_id, template_name='messages/message_remove_confirm.html'):
+    """
+    Remove a message.
+    """
+    message = get_object_or_404(Message, pk=object_id)
+    next = request.GET.get('next', None)
     if request.method == 'POST':
-        object_id = request.POST.get('object_id', '')
-        try:
-            message = Message.objects.get(pk=object_id, to_user=request.user)
-            message.to_status = 3
-        except Message.DoesNotExist:
-            message = Message.objects.get(pk=object_id, from_user=request.user)
-            message.from_status = 2
-        except Message.DoesNotExist:
-            raise Http404
-
+        if message.to_user == request.user:
+            message.to_status = TO_STATUS_DELETED
+        else:
+            message.from_status = FROM_STATUS_DELETED
         message.save()
-        return HttpResponseRedirect(reverse('user_messages'))
-    else:
-        raise Http404
+        return HttpResponseRedirect(next or reverse('messages:messages'))
+    return render_to_response(template_name, {
+        'message': message,
+        'next': next,
+    }, context_instance=RequestContext(request))
 
 
 @login_required
-def message_detail(request, mailbox, object_id, template_name='messages/message_detail.html'):
-    if mailbox == 'sent':
-        message = get_object_or_404(Message, pk=object_id, from_user=request.user)
-    elif mailbox == 'inbox':
-        message = get_object_or_404(Message, pk=object_id, to_user=request.user)
-        message.to_status = 1
+def message_detail(request, object_id, template_name='messages/message_detail.html'):
+    """
+    Return a message.
+    """
+    message = get_object_or_404(Message, pk=object_id)
+    content_type = ContentType.objects.get_for_model(message)
+    thread_list = Message.objects.filter(object_id=message.object.pk, content_type=content_type).order_by('id')
+    if message.to_user == request.user:
+        message.to_status = TO_STATUS_READ
         message.save()
     return render_to_response(template_name, {
         'message': message,
-        'mailbox': mailbox
+        'thread_list': thread_list
     }, context_instance=RequestContext(request))
