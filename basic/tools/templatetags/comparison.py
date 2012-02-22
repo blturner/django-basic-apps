@@ -1,7 +1,9 @@
 from django.template import Library
 from django.template.defaultfilters import lower
+from django.utils.safestring import mark_safe
 
 register = Library()
+
 
 @register.filter
 def is_content_type(obj, arg):
@@ -9,15 +11,29 @@ def is_content_type(obj, arg):
         ct = lower(obj._meta.object_name)
         return ct == arg
     except AttributeError:
-        return ""
+        return ''
+
+
+@register.filter
+def app_label(obj):
+    """
+    Returns an objects app label.
+    """
+    try:
+        return lower(obj._meta.object_name)
+    except AttributeError:
+        return ''
+
 
 @register.filter
 def round(obj):
-    "Returns a number rounded."
+    """
+    Returns a number rounded.
+    """
     try:
         return round(obj)
     except (ValueError,TypeError):
-        return ""
+        return ''
 
 
 @register.filter
@@ -31,11 +47,10 @@ def is_number(obj):
 
 
 @register.filter
-def get_vars(obj):
-    getvars = obj.copy()
-    if 'page' in obj:
-        del getvars['page']
-    if len(getvars.keys()) > 0:
-        return "&%s" % getvars.urlencode()
-    else:
-        return ''
+def is_on(obj1, obj2):
+    """
+    Shortcut to render an 'on' class.
+    """
+    if obj1 == obj2:
+        return mark_safe(' class="on"')
+    return ''
