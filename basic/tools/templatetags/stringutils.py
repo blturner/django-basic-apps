@@ -1,7 +1,6 @@
 import re
 
 from django.template import Library, Template, Context
-from django.contrib.markup.templatetags.markup import markdown
 from django.template.defaultfilters import urlizetrunc
 from django.utils.safestring import mark_safe
 
@@ -30,18 +29,18 @@ def smarty(value):
 
 @register.filter
 def format_text(value):
-    return twitterize(urlizetrunc(markdown(value), 30))
+    return twitterize(urlizetrunc(value, 30))
 
 
 @register.filter
 def format_field(field):
     t = Template("""
-    <p{% if field.is_hidden %} style="display:none;"{% endif %}>
+    <p class="ui-field{% if field.errors %} ui-error{% endif %}" {% if field.is_hidden %} style="display:none;"{% endif %}>
       {{ field.label_tag }}
       <span class="field">
+        {% if field.errors %}<span class="ui-field-error">{{ field.errors|join:", " }}</span>{% endif %}
         {{ field }}
-        {% if field.help_text %}<span class="help_text">{{ field.help_text }}</span>{% endif %}
-        {% if field.errors %}<span class="errors">{{ field.errors|join:", " }}</span>{% endif %}
+        {% if field.help_text %}<span class="ui-field-help">{{ field.help_text }}</span>{% endif %}
       </span>
     </p>
     """)
@@ -57,3 +56,8 @@ def format_fields(form):
     {% endfor %}
     """)
     return t.render(Context({'form': form}))
+
+
+@register.filter
+def placeholder(field, text):
+    return mark_safe(re.sub('<input ', '<input placeholder="%s" ' % text, field))
