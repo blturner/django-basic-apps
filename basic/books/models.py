@@ -38,7 +38,7 @@ class Publisher(models.Model):
 
     @property
     def full_title(self):
-        return '%s %s' % (self.prefix, self.title)
+        return '{} {}'.format(self.prefix, self.title)
 
     @permalink
     def get_absolute_url(self):
@@ -54,7 +54,7 @@ class Book(models.Model):
     authors = models.ManyToManyField(Person, limit_choices_to={'person_types__slug__exact': 'author'}, related_name='books')
     isbn = models.CharField(max_length=14, blank=True)
     pages = models.PositiveSmallIntegerField(blank=True, null=True, default=0)
-    publisher = models.ForeignKey(Publisher, blank=True, null=True)
+    publisher = models.ForeignKey(Publisher, on_delete=models.CASCADE, blank=True, null=True)
     published = models.DateField(blank=True, null=True)
     cover = models.FileField(upload_to='books', blank=True)
     description = models.TextField(blank=True)
@@ -72,7 +72,7 @@ class Book(models.Model):
     @property
     def full_title(self):
         if self.prefix:
-            return '%s %s' % (self.prefix, self.title)
+            return '{} {}'.format(self.prefix, self.title)
         else:
             return '%s' % self.title
 
@@ -84,7 +84,7 @@ class Book(models.Model):
     def amazon_url(self):
         if self.isbn:
             try:
-                return 'http://www.amazon.com/dp/%s/?%s' % (self.isbn, settings.AMAZON_AFFILIATE_EXTENTION)
+                return 'http://www.amazon.com/dp/{}/?{}'.format(self.isbn, settings.AMAZON_AFFILIATE_EXTENTION)
             except:
                 return 'http://www.amazon.com/dp/%s/' % self.isbn
         return ''
@@ -92,8 +92,8 @@ class Book(models.Model):
 
 class Highlight(models.Model):
     """Highlights from books"""
-    user = models.ForeignKey(User)
-    book = models.ForeignKey(Book)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    book = models.ForeignKey(Book, on_delete=models.CASCADE)
     highlight = models.TextField()
     page = models.CharField(blank=True, max_length=20)
     created = models.DateTimeField(auto_now_add=True)
@@ -112,8 +112,8 @@ class Highlight(models.Model):
 
 class Page(models.Model):
     """Page model"""
-    user = models.ForeignKey(User)
-    book = models.ForeignKey(Book)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    book = models.ForeignKey(Book, on_delete=models.CASCADE)
     current_page = models.PositiveSmallIntegerField(default=0)
     created = models.DateTimeField(auto_now_add=True)
 

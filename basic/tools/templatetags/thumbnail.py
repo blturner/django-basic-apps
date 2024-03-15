@@ -31,7 +31,7 @@ def thumbnail(url, size='200x200'):
     except ValueError:
         return os.path.join(settings.MEDIA_URL, url)
     thumbnail = basename + '_t' + size + '.' +  format
-    thumbnail_url = '%s%s' % (settings.MEDIA_URL, thumbnail[len(settings.MEDIA_ROOT):])
+    thumbnail_url = '{}{}'.format(settings.MEDIA_URL, thumbnail[len(settings.MEDIA_ROOT):])
 
     # Find out if a thumbnail in this size already exists. If so, we'll not remake it.
     if not os.path.exists(thumbnail):
@@ -40,7 +40,7 @@ def thumbnail(url, size='200x200'):
         # Open the image.
         try:
             image = Image.open(original_path)
-        except IOError:
+        except OSError:
             return os.path.join(settings.MEDIA_URL, url)
 
         # Make a copy of the original image so we can access its attributes, even
@@ -54,7 +54,7 @@ def thumbnail(url, size='200x200'):
         # Parse the size argument into integers.
         try:
             # See if both height and width exist (i.e. "200x100")
-            desired_width, desired_height = [int(x) for x in size.split('x')]
+            desired_width, desired_height = (int(x) for x in size.split('x'))
             new_size = (desired_width, desired_height)
             # Flag this image for cropping, since we want an explicit width AND height.
             crop = True

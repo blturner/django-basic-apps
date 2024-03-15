@@ -1,5 +1,5 @@
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.db.models import permalink
 from django.contrib.auth.models import User
 from django.conf import settings
@@ -23,7 +23,7 @@ class Category(models.Model):
         ordering = ('title',)
 
     def __unicode__(self):
-        return u'%s' % self.title
+        return '%s' % self.title
 
     @permalink
     def get_absolute_url(self):
@@ -38,7 +38,7 @@ class Post(models.Model):
     )
     title = models.CharField(_('title'), max_length=200)
     slug = models.SlugField(_('slug'), unique_for_date='publish')
-    author = models.ForeignKey(User, blank=True, null=True)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     body = models.TextField(_('body'), )
     tease = models.TextField(_('tease'), blank=True, help_text=_('Concise text suggested. Does not appear in RSS feed.'))
     status = models.IntegerField(_('status'), choices=STATUS_CHOICES, default=2)
@@ -58,7 +58,7 @@ class Post(models.Model):
         get_latest_by = 'publish'
 
     def __unicode__(self):
-        return u'%s' % self.title
+        return '%s' % self.title
 
     @permalink
     def get_absolute_url(self):

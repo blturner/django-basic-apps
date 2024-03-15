@@ -4,7 +4,7 @@ from django.http import Http404, HttpResponseRedirect
 from django.views.generic import list_detail
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from basic.profiles.models import *
 from basic.profiles.forms import *
 

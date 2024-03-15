@@ -1,5 +1,5 @@
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.generic import GenericForeignKey
 from django.contrib.auth.models import User
@@ -22,11 +22,11 @@ class FlagType(models.Model):
 
 class Flag(models.Model):
     """ Flag model """
-    content_type = models.ForeignKey(ContentType, related_name='flags')
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, related_name='flags')
     object_id = models.IntegerField()
     object = GenericForeignKey()
-    flag_type = models.ForeignKey(FlagType)
-    user = models.ForeignKey(User)
+    flag_type = models.ForeignKey(FlagType, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     created = models.DateTimeField(_('created'), auto_now_add=True)
     modified = models.DateTimeField(_('modified'), auto_now=True)
 

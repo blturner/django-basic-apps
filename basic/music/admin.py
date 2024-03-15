@@ -2,27 +2,27 @@ from django.contrib import admin
 from basic.music.models import *
 
 
+@admin.register(Genre)
 class GenreAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
-admin.site.register(Genre, GenreAdmin)
 
 
+@admin.register(Label)
 class LabelAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
-admin.site.register(Label, LabelAdmin)
 
 
+@admin.register(Band)
 class BandAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
-admin.site.register(Band, BandAdmin)
 
 
+@admin.register(Album)
 class AlbumAdmin(admin.ModelAdmin):
     list_display  = ('title', 'band',)
     prepopulated_fields = {'slug': ('title',)}
-admin.site.register(Album, AlbumAdmin)
 
 
+@admin.register(Track)
 class TrackAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
-admin.site.register(Track, TrackAdmin)

@@ -2,7 +2,7 @@ import re, datetime
 from dateutil import relativedelta
 
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.db.models import permalink
 from django.contrib.auth.models import User
 from django.contrib.localflavor.us.models import PhoneNumberField
@@ -14,7 +14,7 @@ class Profile(models.Model):
         (1, 'Male'),
         (2, 'Female'),
     )
-    user = models.ForeignKey(User, unique=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, unique=True)
     gender = models.PositiveSmallIntegerField(_('gender'), choices=GENDER_CHOICES, blank=True, null=True)
     mugshot = models.FileField(_('mugshot'), upload_to='mugshots', blank=True)
     birth_date = models.DateField(_('birth date'), blank=True, null=True)
@@ -25,7 +25,7 @@ class Profile(models.Model):
     zip = models.CharField(_('zip'), blank=True, max_length=10)
     country = models.CharField(_('country'), blank=True, max_length=100)
     mobile = PhoneNumberField(_('mobile'), blank=True)
-    mobile_provider = models.ForeignKey('MobileProvider', blank=True, null=True)
+    mobile_provider = models.ForeignKey('MobileProvider', on_delete=models.CASCADE, blank=True, null=True)
 
     class Meta:
         verbose_name = _('user profile')
@@ -33,13 +33,13 @@ class Profile(models.Model):
         db_table = 'user_profiles'
 
     def __unicode__(self):
-        return u"%s" % self.user.get_full_name()
+        return "%s" % self.user.get_full_name()
 
     @property
     def age(self):
         TODAY = datetime.date.today()
         if self.birth_date:
-            return u"%s" % relativedelta.relativedelta(TODAY, self.birth_date).years
+            return "%s" % relativedelta.relativedelta(TODAY, self.birth_date).years
         else:
             return None
 
@@ -50,7 +50,7 @@ class Profile(models.Model):
     @property
     def sms_address(self):
         if (self.mobile and self.mobile_provider):
-            return u"%s@%s" % (re.sub('-', '', self.mobile), self.mobile_provider.domain)
+            return "{}@{}".format(re.sub('-', '', self.mobile), self.mobile_provider.domain)
 
 
 class MobileProvider(models.Model):
@@ -64,7 +64,7 @@ class MobileProvider(models.Model):
         db_table = 'user_mobile_providers'
 
     def __unicode__(self):
-        return u"%s" % self.title
+        return "%s" % self.title
 
 
 class ServiceType(models.Model):
@@ -78,13 +78,13 @@ class ServiceType(models.Model):
         db_table = 'user_service_types'
 
     def __unicode__(self):
-        return u"%s" % self.title
+        return "%s" % self.title
 
 
 class Service(models.Model):
     """Service model"""
-    service = models.ForeignKey(ServiceType)
-    profile = models.ForeignKey(Profile)
+    service = models.ForeignKey(ServiceType, on_delete=models.CASCADE)
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     username = models.CharField(_('Name or ID'), max_length=100, help_text="Username or id to be inserted into the service url.")
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
@@ -95,7 +95,7 @@ class Service(models.Model):
         db_table = 'user_services'
 
     def __unicode__(self):
-        return u"%s" % self.username
+        return "%s" % self.username
 
     @property
     def service_url(self):
@@ -103,12 +103,12 @@ class Service(models.Model):
 
     @property
     def title(self):
-        return u"%s" % self.service.title
+        return "%s" % self.service.title
 
 
 class Link(models.Model):
     """Service type model"""
-    profile = models.ForeignKey(Profile)
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     title = models.CharField(_('title'), max_length=100)
     url = models.URLField(_('url'))
 
@@ -118,4 +118,4 @@ class Link(models.Model):
         db_table = 'user_links'
 
     def __unicode__(self):
-        return u"%s" % self.title
+        return "%s" % self.title

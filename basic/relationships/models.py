@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.core.cache import cache
 from django.conf import settings
 
@@ -16,7 +16,7 @@ RELATIONSHIP_CACHE_KEYS = {
 
 class RelationshipManager(models.Manager):
     def _set_cache(self, user, user_list, relationship_type, flat=False, flat_attr='to_user'):
-        cache_key = 'user_%s_%s' % (user.pk, relationship_type)
+        cache_key = 'user_{}_{}'.format(user.pk, relationship_type)
         if flat:
             cache_key = cache_key+'_flat'
             user_list = user_list.values_list(flat_attr, flat=True)
@@ -65,8 +65,8 @@ class RelationshipManager(models.Manager):
 
 class Relationship(models.Model):
     """Relationship model"""
-    from_user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='from_users')
-    to_user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='to_users')
+    from_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='from_users')
+    to_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='to_users')
     created = models.DateTimeField(auto_now_add=True)
     is_blocked = models.BooleanField(default=False)
     objects = RelationshipManager()
@@ -79,18 +79,18 @@ class Relationship(models.Model):
 
     def __unicode__(self):
         if self.is_blocked:
-            return u'%s is blocking %s' % (self.from_user, self.to_user)
-        return u'%s is connected to %s' % (self.from_user, self.to_user)
+            return '{} is blocking {}'.format(self.from_user, self.to_user)
+        return '{} is connected to {}'.format(self.from_user, self.to_user)
 
     def save(self, *args, **kwargs):
         self._delete_cache_keys()
-        super(Relationship, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
         self._delete_cache_keys()
-        super(Relationship, self).delete(*args, **kwargs)
+        super().delete(*args, **kwargs)
 
     def _delete_cache_keys(self):
         for key in RELATIONSHIP_CACHE_KEYS:
-            cache.delete('user_%s_%s' % (self.from_user.pk, RELATIONSHIP_CACHE_KEYS[key]))
-            cache.delete('user_%s_%s_flat' % (self.from_user.pk, RELATIONSHIP_CACHE_KEYS[key]))
+            cache.delete('user_{}_{}'.format(self.from_user.pk, RELATIONSHIP_CACHE_KEYS[key]))
+            cache.delete('user_{}_{}_flat'.format(self.from_user.pk, RELATIONSHIP_CACHE_KEYS[key]))

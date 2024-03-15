@@ -2,16 +2,16 @@ from django.contrib import admin
 from basic.movies.models import *
 
 
+@admin.register(Genre)
 class GenreAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
-admin.site.register(Genre, GenreAdmin)
 
 
+@admin.register(Studio)
 class StudioAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
-admin.site.register(Studio, StudioAdmin)
 
 
+@admin.register(Movie)
 class MovieAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
-admin.site.register(Movie, MovieAdmin)

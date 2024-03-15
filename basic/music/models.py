@@ -37,7 +37,7 @@ class Label(models.Model):
 
     @property
     def full_title(self):
-        return '%s %s' % (self.prefix, self.title)
+        return '{} {}'.format(self.prefix, self.title)
 
     @permalink
     def get_absolute_url(self):
@@ -61,7 +61,7 @@ class Band(models.Model):
 
     @property
     def full_title(self):
-        return '%s %s' % (self.prefix, self.title)
+        return '{} {}'.format(self.prefix, self.title)
 
     @permalink
     def get_absolute_url(self):
@@ -74,8 +74,8 @@ class Album(models.Model):
     prefix = models.CharField(max_length=20, blank=True)
     subtitle = models.CharField(blank=True, max_length=255)
     slug = models.SlugField()
-    band = models.ForeignKey(Band, blank=True)
-    label = models.ForeignKey(Label, blank=True)
+    band = models.ForeignKey(Band, on_delete=models.CASCADE, blank=True)
+    label = models.ForeignKey(Label, on_delete=models.CASCADE, blank=True)
     asin = models.CharField(max_length=14, blank=True)
     release_date = models.DateField(blank=True, null=True)
     cover = models.FileField(upload_to='albums', blank=True)
@@ -97,27 +97,27 @@ class Album(models.Model):
 
     @property
     def full_title(self):
-        return '%s %s' % (self.prefix, self.title)
+        return '{} {}'.format(self.prefix, self.title)
 
     @property
     def cover_url(self):
-        return '%s%s' % (settings.MEDIA_URL, self.cover)
+        return '{}{}'.format(settings.MEDIA_URL, self.cover)
 
     @property
     def amazon_url(self):
         try:
-            return 'http://www.amazon.com/dp/%s/?%s' % (self.asin, settings.AMAZON_AFFILIATE_EXTENTION)
+            return 'http://www.amazon.com/dp/{}/?{}'.format(self.asin, settings.AMAZON_AFFILIATE_EXTENTION)
         except:
             return 'http://www.amazon.com/dp/%s/' % self.asin
 
 
 class Track(models.Model):
     """Tracks model"""
-    album = models.ForeignKey(Album, blank=True, null=True, related_name='tracks')
-    band = models.ForeignKey(Band, blank=True, null=True, related_name='tracks')
+    album = models.ForeignKey(Album, on_delete=models.CASCADE, blank=True, null=True, related_name='tracks')
+    band = models.ForeignKey(Band, on_delete=models.CASCADE, blank=True, null=True, related_name='tracks')
     title = models.CharField(max_length=255)
     slug = models.SlugField()
-    mp3 = models.FilePathField(path=settings.MEDIA_ROOT+'tracks', match='.*\.mp3$')
+    mp3 = models.FilePathField(path=settings.MEDIA_ROOT+'tracks', match=r'.*\.mp3$')
 
     class Meta:
         db_table = 'music_tracks'

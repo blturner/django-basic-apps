@@ -1,5 +1,5 @@
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from django.db.models import permalink
 from django.contrib.auth.models import User
@@ -38,7 +38,7 @@ class Person(models.Model):
     middle_name = models.CharField(_('middle name'), blank=True, max_length=100)
     last_name = models.CharField(_('last name'), blank=True, max_length=100)
     slug = models.SlugField(_('slug'), unique=True)
-    user = models.ForeignKey(User, blank=True, null=True, help_text='If the person is an existing user of your site.')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, help_text='If the person is an existing user of your site.')
     gender = models.PositiveSmallIntegerField(_('gender'), choices=GENDER_CHOICES, blank=True, null=True)
     mugshot = models.FileField(_('mugshot'), upload_to='mugshots', blank=True)
     mugshot_credit = models.CharField(_('mugshot credit'), blank=True, max_length=200)
@@ -53,16 +53,16 @@ class Person(models.Model):
         ordering = ('last_name', 'first_name',)
 
     def __unicode__(self):
-        return u'%s' % self.full_name
+        return '%s' % self.full_name
 
     @property
     def full_name(self):
-        return u'%s %s' % (self.first_name, self.last_name)
+        return '{} {}'.format(self.first_name, self.last_name)
 
     @property
     def age(self):
         TODAY = datetime.date.today()
-        return u'%s' % dateutil.relativedelta(TODAY, self.birth_date).years
+        return '%s' % dateutil.relativedelta(TODAY, self.birth_date).years
 
     @permalink
     def get_absolute_url(self):
@@ -71,7 +71,7 @@ class Person(models.Model):
 
 class Quote(models.Model):
     """Quote model."""
-    person = models.ForeignKey(Person)
+    person = models.ForeignKey(Person, on_delete=models.CASCADE)
     quote = models.TextField(_('quote'))
     source = models.CharField(_('source'), blank=True, max_length=255)
 
@@ -81,7 +81,7 @@ class Quote(models.Model):
         db_table = 'people_quotes'
 
     def __unicode__(self):
-        return u'%s' % self.quote
+        return '%s' % self.quote
 
     @permalink
     def get_absolute_url(self):
@@ -98,9 +98,9 @@ class Conversation(models.Model):
 
 class ConversationItem(models.Model):
     """An item within a conversation."""
-    conversation      = models.ForeignKey(Conversation, related_name='items')
+    conversation      = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='items')
     order             = models.PositiveSmallIntegerField()
-    speaker           = models.ForeignKey(Person)
+    speaker           = models.ForeignKey(Person, on_delete=models.CASCADE)
     quote             = models.TextField()
 
     class Meta:
@@ -108,4 +108,4 @@ class ConversationItem(models.Model):
         unique_together = (('conversation', 'order'),)
 
     def __unicode__(self):
-        return u'%s: %s' % (self.speaker.first_name, self.quote)
+        return '{}: {}'.format(self.speaker.first_name, self.quote)

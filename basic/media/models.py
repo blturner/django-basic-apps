@@ -54,7 +54,7 @@ class PhotoSet(models.Model):
     title = models.CharField(max_length=255)
     slug = models.SlugField()
     description = models.TextField(blank=True)
-    cover_photo = models.ForeignKey('Photo', blank=True, null=True)
+    cover_photo = models.ForeignKey('Photo', on_delete=models.CASCADE, blank=True, null=True)
     photos = models.ManyToManyField('Photo', related_name='photo_sets')
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
@@ -110,7 +110,7 @@ class Photo(models.Model):
 
     @property
     def url(self):
-        return '%s%s' % (settings.MEDIA_URL, self.photo)
+        return '{}{}'.format(settings.MEDIA_URL, self.photo)
 
     @permalink
     def get_absolute_url(self):

@@ -2,7 +2,7 @@ import datetime
 
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect, Http404
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from basic.groups.models import Group, GroupMember
 
@@ -14,7 +14,7 @@ def membership_required(function=None):
     """
     def decorator(request, *args, **kwargs):
         group = get_object_or_404(Group, slug=kwargs['slug'])
-        if request.user.is_anonymous():
+        if request.user.is_anonymous:
             return HttpResponseRedirect(reverse('django.contrib.auth.views.login'))
         if GroupMember.objects.is_member(group, request.user):
             return function(request, *args, **kwargs)
@@ -29,7 +29,7 @@ def ownership_required(function=None):
     """
     def decorator(request, *args, **kwargs):
         group = get_object_or_404(Group, slug=kwargs['slug'])
-        if request.user.is_anonymous():
+        if request.user.is_anonymous:
             return HttpResponseRedirect(reverse('django.contrib.auth.views.login'))
         if GroupMember.objects.is_owner(group, request.user):
             return function(request, *args, **kwargs)
@@ -44,7 +44,7 @@ def moderator_required(function=None):
     """
     def decorator(request, *args, **kwargs):
         group = get_object_or_404(Group, slug=kwargs['slug'])
-        if request.user.is_anonymous():
+        if request.user.is_anonymous:
             return HttpResponseRedirect(reverse('django.contrib.auth.views.login'))
         if GroupMember.objects.is_moderator(group, request.user):
             return function(request, *args, **kwargs)

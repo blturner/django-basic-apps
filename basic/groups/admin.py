@@ -17,6 +17,7 @@ class GroupPageInline(admin.TabularInline):
     fk = 'group'
 
 
+@admin.register(Group)
 class GroupAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
     raw_id_fields = ('creator',)
@@ -24,16 +25,15 @@ class GroupAdmin(admin.ModelAdmin):
         GroupPageInline,
         GroupMemberInline
     )
-admin.site.register(Group, GroupAdmin)
 
 
+@admin.register(GroupTopic)
 class GroupTopicAdmin(admin.ModelAdmin):
     raw_id_fields = ('user', 'group')
     inlines = (GroupMessageInline,)
-admin.site.register(GroupTopic, GroupTopicAdmin)
 
 
+@admin.register(GroupMember)
 class GroupMemberAdmin(admin.ModelAdmin):
     raw_id_fields = ('user', 'group')
     list_display = ('user', 'group', 'status', 'created')
-admin.site.register(GroupMember, GroupMemberAdmin)

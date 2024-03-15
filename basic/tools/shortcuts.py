@@ -14,7 +14,7 @@ def build_filename(instance, filename):
     now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     name = hashlib.md5('%s' % now).hexdigest()
     ext = os.path.splitext(filename)
-    return os.path.join('%s/%s' % (instance._meta.app_label, instance._meta.module_name), '%s%s' % (name, ext[1]))
+    return os.path.join('{}/{}'.format(instance._meta.app_label, instance._meta.module_name), '{}{}'.format(name, ext[1]))
 
 
 def render(request, *args, **kwargs):
