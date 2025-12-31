@@ -2,31 +2,31 @@ from django.contrib import admin
 from basic.media.models import *
 
 
+@admin.register(AudioSet)
 class AudioSetAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
-admin.site.register(AudioSet, AudioSetAdmin)
 
 
+@admin.register(Audio)
 class AudioAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
-admin.site.register(Audio, AudioAdmin)
 
 
+@admin.register(PhotoSet)
 class PhotoSetAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
-admin.site.register(PhotoSet, PhotoSetAdmin)
 
 
+@admin.register(Photo)
 class PhotoAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
-admin.site.register(Photo, PhotoAdmin)
 
 
+@admin.register(VideoSet)
 class VideoSetAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
-admin.site.register(VideoSet, VideoSetAdmin)
 
 
+@admin.register(Video)
 class VideoAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
-admin.site.register(Video, VideoAdmin)

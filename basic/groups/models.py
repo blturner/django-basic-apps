@@ -29,7 +29,7 @@ class Group(models.Model):
     title = models.CharField(blank=False, max_length=255)
     slug = models.SlugField(unique=True, help_text="Used for the Group URL: http://example.com/groups/the-club/")
     tease = models.TextField(blank=True, help_text="Brief explaination of what this group is. Shows up when the group is listed amoung other groups.")
-    creator = models.ForeignKey(User, related_name='created_groups', help_text="Serves as a record as who the original creator was in case ownership is transfered.")
+    creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_groups', help_text="Serves as a record as who the original creator was in case ownership is transfered.")
     icon = models.FileField(upload_to=get_icon_path, blank=True, help_text="Needs to be larger than 120x120 pixels.")
     invite_only = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
@@ -59,7 +59,7 @@ class Group(models.Model):
 
 class GroupPage(models.Model):
     """ GroupPage model """
-    group = models.ForeignKey(Group, related_name='pages')
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='pages')
     title = models.CharField(blank=True, max_length=100)
     slug = models.SlugField(help_text='Used for the page URL.')
     body = models.TextField(blank=True)
@@ -82,8 +82,8 @@ class GroupPage(models.Model):
 
 class GroupTopic(models.Model):
     """ GroupTopic model """
-    group = models.ForeignKey(Group, related_name='topics')
-    user = models.ForeignKey(User, related_name='group_topics')
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='topics')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='group_topics')
     title = models.CharField(blank=False, max_length=100)
     description = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
@@ -113,13 +113,13 @@ class GroupMessageManager(models.Manager):
     """Returns messages that are flagged as active."""
 
     def get_query_set(self):
-        return super(GroupMessageManager, self).get_query_set().filter(is_active=True)
+        return super().get_query_set().filter(is_active=True)
 
 
 class GroupMessage(models.Model):
     """ GroupMessage model """
-    topic = models.ForeignKey(GroupTopic, related_name="messages")
-    user = models.ForeignKey(User)
+    topic = models.ForeignKey(GroupTopic, on_delete=models.CASCADE, related_name="messages")
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     message = models.TextField(blank=False)
     is_active = models.BooleanField(default=True)
     objects = GroupMessageManager()
@@ -171,8 +171,8 @@ class GroupMemberManager(models.Manager):
 
 class GroupMember(models.Model):
     """ GroupMember model """
-    user = models.ForeignKey(User, related_name='group_memberships')
-    group = models.ForeignKey(Group, related_name='members')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='group_memberships')
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='members')
     status = models.PositiveSmallIntegerField(choices=GROUP_MEMBER_CHOICES, default=GROUP_MEMBER)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)

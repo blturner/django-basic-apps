@@ -2,15 +2,15 @@ from django.contrib import admin
 from basic.profiles.models import *
 
 
+@admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'city')
-admin.site.register(Profile, ProfileAdmin)
 
 
+@admin.register(Service)
 class ServiceAdmin(admin.ModelAdmin):
     list_display = ('profile', 'service')
     list_filter = ('profile', 'service')
-admin.site.register(Service, ServiceAdmin)
 
 
 admin.site.register(MobileProvider)

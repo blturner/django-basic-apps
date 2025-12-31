@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 
 from basic.groups.decorators import *
@@ -19,7 +19,7 @@ def group_list(request, username=None,
             Group object list
     """
     group_list = Group.objects.filter(is_active=True)
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         membership_list = group_list.filter(members__user=request.user)
     else:
         membership_list = []

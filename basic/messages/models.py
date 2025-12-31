@@ -1,5 +1,5 @@
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.db.models import permalink, Manager, Q
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
@@ -45,8 +45,8 @@ class Message(models.Model):
         (TO_STATUS_REPLIED, 'Replied'),
         (TO_STATUS_DELETED, 'Deleted')
     )
-    from_user = models.ForeignKey(User, related_name='sent_messages')
-    to_user = models.ForeignKey(User, related_name='messages')
+    from_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
+    to_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='messages')
     from_status = models.PositiveSmallIntegerField(choices=FROM_STATUS_CHOICES, blank=True, null=True, default=1)
     to_status = models.PositiveSmallIntegerField(choices=TO_STATUS_CHOICES, blank=True, null=True, default=0)
     subject = models.CharField(blank=True, max_length=255)
@@ -55,7 +55,7 @@ class Message(models.Model):
     modified = models.DateTimeField(_('modified'), auto_now=True)
     objects = MessageManager()
 
-    content_type = models.ForeignKey(ContentType, blank=True, null=True, related_name='messages')
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, blank=True, null=True, related_name='messages')
     object_id = models.IntegerField(blank=True, null=True)
     object = GenericForeignKey()
 
@@ -66,7 +66,7 @@ class Message(models.Model):
         ordering = ('-id',)
 
     def __unicode__(self):
-        return u'Message from %s' % self.from_user.username
+        return 'Message from %s' % self.from_user.username
 
     @permalink
     def get_absolute_url(self):
@@ -79,7 +79,7 @@ class Message(models.Model):
         return False
 
     def save(self, *args, **kwargs):
-        super(Message, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
         if not self.object:
             self.object = self
             self.save()

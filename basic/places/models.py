@@ -1,5 +1,5 @@
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.db.models import permalink
 from django.contrib.localflavor.us.models import PhoneNumberField
 from tagging.fields import TagField
@@ -18,7 +18,7 @@ class PlaceType(models.Model):
         db_table = 'place_types'
 
     def __unicode__(self):
-        return u'%s' % self.title
+        return '%s' % self.title
 
     @permalink
     def get_absolute_url(self):
@@ -39,7 +39,7 @@ class City(models.Model):
         ordering = ('state', 'city',)
 
     def __unicode__(self):
-        return u'%s, %s' % (self.city, self.state)
+        return '{}, {}'.format(self.city, self.state)
 
     @permalink
     def get_absolute_url(self):
@@ -51,7 +51,7 @@ class Point(models.Model):
     latitude = models.FloatField(_('latitude'), blank=True, null=True)
     longitude = models.FloatField(_('longitude'), blank=True, null=True)
     address = models.CharField(_('address'), max_length=200, blank=True)
-    city = models.ForeignKey(City)
+    city = models.ForeignKey(City, on_delete=models.CASCADE)
     zip = models.CharField(_('zip'), max_length=10, blank=True)
     country = models.CharField(_('country'), blank=True, max_length=100)
 
@@ -62,7 +62,7 @@ class Point(models.Model):
         ordering = ('address',)
 
     def __unicode__(self):
-        return u'%s' % self.address
+        return '%s' % self.address
 
 
 class Place(models.Model):
@@ -71,7 +71,7 @@ class Place(models.Model):
         (0, 'Inactive'),
         (1, 'Active'),
     )
-    point = models.ForeignKey(Point)
+    point = models.ForeignKey(Point, on_delete=models.CASCADE)
     prefix = models.CharField(_('Pre-name'), blank=True, max_length=20)
     title = models.CharField(_('title'), max_length=255)
     slug = models.SlugField(_('slug'))
@@ -94,15 +94,15 @@ class Place(models.Model):
         ordering = ('title',)
 
     def __unicode__(self):
-        return u'%s' % self.full_title
+        return '%s' % self.full_title
 
     @property
     def city(self):
-        return u'%s' % self.point.city
+        return '%s' % self.point.city
 
     @property
     def full_title(self):
-        return u'%s %s' % (self.prefix, self.title)
+        return '{} {}'.format(self.prefix, self.title)
 
     @permalink
     def get_absolute_url(self):
@@ -118,4 +118,4 @@ class Place(models.Model):
 
     @property
     def address(self):
-        return u'%s, %s %s' % (self.point.address, self.point.city, self.point.zip)
+        return '{}, {} {}'.format(self.point.address, self.point.city, self.point.zip)

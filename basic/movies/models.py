@@ -37,7 +37,7 @@ class Studio(models.Model):
 
     @property
     def full_title(self):
-        return '%s %s' % (self.prefix, self.title)
+        return '{} {}'.format(self.prefix, self.title)
 
     @permalink
     def get_absolute_url(self):
@@ -51,7 +51,7 @@ class Movie(models.Model):
     subtitle = models.CharField(blank=True, max_length=255)
     slug = models.SlugField(unique=True)
     directors = models.ManyToManyField(Person, limit_choices_to={'person_types__slug__exact': 'director'}, blank=True)
-    studio = models.ForeignKey(Studio, blank=True, null=True)
+    studio = models.ForeignKey(Studio, on_delete=models.CASCADE, blank=True, null=True)
     released = models.DateField(blank=True, null=True)
     asin = models.CharField(blank=True, max_length=100)
     cover = models.FileField(upload_to='films', blank=True)
@@ -67,7 +67,7 @@ class Movie(models.Model):
 
     @property
     def full_title(self):
-        return '%s %s' % (self.prefix, self.title)
+        return '{} {}'.format(self.prefix, self.title)
 
     @permalink
     def get_absolute_url(self):
@@ -76,10 +76,10 @@ class Movie(models.Model):
     @property
     def amazon_url(self):
         try:
-            return 'http://www.amazon.com/dp/%s/?%s' % (self.asin, settings.AMAZON_AFFILIATE_EXTENTION)
+            return 'http://www.amazon.com/dp/{}/?{}'.format(self.asin, settings.AMAZON_AFFILIATE_EXTENTION)
         except:
             return 'http://www.amazon.com/dp/%s/' % self.asin
 
     @property
     def cover_url(self):
-        return '%s%s' % (settings.MEDIA_URL, self.cover)
+        return '{}{}'.format(settings.MEDIA_URL, self.cover)

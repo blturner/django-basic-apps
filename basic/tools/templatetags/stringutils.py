@@ -10,7 +10,7 @@ register = Library()
 @register.filter
 def twitterize(value):
     try:
-        new_value = re.sub(r'(@)(\w+)', '\g<1><a href="/\g<2>/">\g<2></a>', value)
+        new_value = re.sub(r'(@)(\w+)', r'\g<1><a href="/\g<2>/">\g<2></a>', value)
         return mark_safe(new_value)
     except:
         return value

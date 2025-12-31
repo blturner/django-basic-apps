@@ -33,13 +33,13 @@ class InvitationManager(models.Manager):
 
 class Invitation(models.Model):
     """ Invitation model """
-    from_user = models.ForeignKey(User)
+    from_user = models.ForeignKey(User, on_delete=models.CASCADE)
     token = models.CharField(max_length=40)
     name = models.CharField(blank=True, max_length=100)
     email = models.EmailField()
     message = models.TextField(blank=True)
     status = models.PositiveSmallIntegerField(choices=INVITATION_STATUS_CHOICES, default=0)
-    site = models.ForeignKey(Site, default=settings.SITE_ID)
+    site = models.ForeignKey(Site, on_delete=models.CASCADE, default=settings.SITE_ID)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
     objects = InvitationManager()
@@ -54,9 +54,9 @@ class Invitation(models.Model):
 
 class InvitationAllotment(models.Model):
     """ InvitationAllotment model """
-    user = models.OneToOneField(User, related_name='invitation_allotment')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='invitation_allotment')
     amount = models.IntegerField(default=INVITATION_ALLOTMENT)
-    site = models.ForeignKey(Site, default=settings.SITE_ID)
+    site = models.ForeignKey(Site, on_delete=models.CASCADE, default=settings.SITE_ID)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 

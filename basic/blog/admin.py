@@ -2,16 +2,16 @@ from django.contrib import admin
 from basic.blog.models import *
 
 
+@admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
-admin.site.register(Category, CategoryAdmin)
 
+@admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
     list_display  = ('title', 'publish', 'status')
     list_filter   = ('sites', 'publish', 'categories', 'status')
     search_fields = ('title', 'body')
     prepopulated_fields = {'slug': ('title',)}
-admin.site.register(Post, PostAdmin)
 
 
 class BlogRollAdmin(admin.ModelAdmin):

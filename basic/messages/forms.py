@@ -19,4 +19,4 @@ class MessageForm(forms.ModelForm):
                 return self.cleaned_data['to_user']
             except User.DoesNotExist:
                 pass
-        raise forms.ValidationError(u'There are no users with this username.')
+        raise forms.ValidationError('There are no users with this username.')
