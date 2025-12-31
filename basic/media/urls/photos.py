@@ -24,11 +24,7 @@ urlpatterns = [
     path(
         "sets/<slug:slug>/", PhotoSetDetail.as_view(), name="photo_set_detail"
     ),
-    path(
-        "sets/",
-        PhotoSetList.as_view(),
-        name="photo_set_list",
-    ),
+    path("sets/", PhotoSetList.as_view(), name="photo_set_list"),
     path("<slug:slug>/", PhotoDetail.as_view(), name="photo_detail"),
     path("", PhotoList.as_view(), name="photo_list"),
 ]
