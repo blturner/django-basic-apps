@@ -35,8 +35,11 @@ class Audio(models.Model):
         blank=True,
         help_text='An image that will be used as a thumbnail.',
     )
+    file = models.FileField(upload_to='audio')
     audio = models.FilePathField(
-        path=settings.MEDIA_ROOT + "audios/", recursive=True
+        path=settings.MEDIA_ROOT + "audios/",
+        recursive=True,
+        blank=True,
     )
     description = models.TextField(blank=True)
     uploaded = models.DateTimeField(auto_now_add=True)
@@ -76,8 +79,20 @@ class PhotoSet(models.Model):
         return reverse('photo_set_detail', kwargs={'slug': self.slug})
 
 
+class PhotoManager(models.Manager):
+    def get_queryset(self):
+        return (
+            super().get_queryset().filter(content_type=Photo.ContentType.PHOTO)
+        )
+
+
 class Photo(models.Model):
     """Photo model"""
+
+    class ContentType(models.IntegerChoices):
+        PHOTO = 1
+        SCREENSHOT = 2
+        ILLUSTRATION = 3
 
     LICENSES = (
         ('http://creativecommons.org/licenses/by/2.0/', 'CC Attribution'),
@@ -102,6 +117,9 @@ class Photo(models.Model):
             'CC Attribution-ShareAlike',
         ),
     )
+
+    objects = PhotoManager()
+
     title = models.CharField(max_length=255)
     slug = models.SlugField()
     photo = models.FileField(upload_to="photos")
@@ -111,9 +129,11 @@ class Photo(models.Model):
     uploaded = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
     _exif = models.TextField(blank=True)
+    content_type = models.IntegerField(choices=ContentType.choices, default=1)
 
     class Meta:
         db_table = 'media_photos'
+        ordering = ('-uploaded',)
 
     def _set_exif(self, d):
         self._exif = json.dumps(d)
@@ -135,6 +155,22 @@ class Photo(models.Model):
 
     def get_absolute_url(self):
         return reverse('photo_detail', kwargs={'slug': self.slug})
+
+
+class ScreenshotManager(models.Manager):
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .filter(content_type=Photo.ContentType.SCREENSHOT)
+        )
+
+
+class Screenshot(Photo):
+    class Meta:
+        proxy = True
+
+    objects = ScreenshotManager()
 
 
 class VideoSet(models.Model):
@@ -167,8 +203,11 @@ class Video(models.Model):
         blank=True,
         help_text='An image that will be used as a thumbnail.',
     )
+    file = models.FileField(upload_to='videos')
     video = models.FilePathField(
-        path=settings.MEDIA_ROOT + 'videos/', recursive=True
+        path=settings.MEDIA_ROOT + 'videos/',
+        recursive=True,
+        blank=True,
     )
     description = models.TextField(blank=True)
     uploaded = models.DateTimeField(auto_now_add=True)

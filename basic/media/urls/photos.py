@@ -1,7 +1,8 @@
-from django.views.generic import DetailView, ListView
+from django.views.generic import CreateView, DetailView, ListView
 from django.urls import path
 
 from basic.media.models import Photo, PhotoSet
+from ..forms import PhotoSetForm
 
 
 class PhotoList(ListView):
@@ -20,7 +21,13 @@ class PhotoSetDetail(DetailView):
     queryset = PhotoSet.objects.all()
 
 
+class PhotoSetCreate(CreateView):
+    model = PhotoSet
+    form_class = PhotoSetForm
+
+
 urlpatterns = [
+    path("sets/create/", PhotoSetCreate.as_view(), name="photo_set_create"),
     path(
         "sets/<slug:slug>/", PhotoSetDetail.as_view(), name="photo_set_detail"
     ),
